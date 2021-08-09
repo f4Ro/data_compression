@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "Data compression of sensor signals using machine learning in a resource constrained environment"
+version = "0.1.0"
+description = ""
+authors = ["Alexander Kuebel <alexander.kuebel@code.berlin>", "Fabian Rothfuß <fabian.rothfuss@code.berlin>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+tensorflow = "^2.5.0"
+
+[tool.poetry.dev-dependencies]
+autopep8 = "^1.5.7"
+flake8 = "^3.9.2"
+mypy = "^0.910"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

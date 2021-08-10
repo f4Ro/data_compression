@@ -20,6 +20,10 @@ def run_benchmarks(encoder: Model, decoder: Model, model: Model, data: Any, verb
 
 
 if __name__ == '__main__':
-    from models.dummy_model import encoder, decoder, model
-    data = tf.ones((1, 10))
+    # from models.dummy_model import encoder, decoder, model
+    # data = tf.ones((1, 10))
+    # print(run_benchmarks(encoder, decoder, model, data))
+    from models.rnn.rnn import create_model
+    encoder, decoder, model = create_model(20, 1, 1)
+    data = tf.ones((1, 20, 1))
     print(run_benchmarks(encoder, decoder, model, data))

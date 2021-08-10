@@ -14,6 +14,7 @@ tensorflow = "^2.5.0"
 autopep8 = "^1.5.7"
 flake8 = "^3.9.2"
 mypy = "^0.910"
+tornado = "^6.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

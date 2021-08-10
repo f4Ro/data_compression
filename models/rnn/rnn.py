@@ -75,10 +75,12 @@ def create_model(
     dropout: float = 0.0,
     recurrent_dropout: float = 0.0,
 ) -> Model:
+    input_shape = (sequence_length, n_dims)
+
+    # Encoder
     # [batch, timesteps, feature] is shape of inputs
-    inputs: Input = Input(shape=(sequence_length, n_dims), batch_size=batch_size)
-    x = inputs
-    x = LSTM(
+    encoder_inputs: Input = Input(shape=input_shape, batch_size=batch_size)
+    encoder_outputs = LSTM(
         n_dims,
         return_sequences=False,
         stateful=True,
@@ -89,9 +91,13 @@ def create_model(
         activity_regularizer=activity_regularizer,
         dropout=dropout,
         recurrent_dropout=recurrent_dropout,
-    )(x)
-    x = RepeatVector(sequence_length)(x)
-    x = LSTM(
+    )(encoder_inputs)
+    encoder = Model(encoder_inputs, encoder_outputs)
+
+    # Decoder
+    decoder_inputs: Input = Input(shape=encoder_outputs.shape[1:], batch_size=batch_size)
+    x = RepeatVector(sequence_length)(decoder_inputs)
+    decoder_outputs = LSTM(
         n_dims,
         stateful=True,
         return_sequences=True,
@@ -105,73 +111,78 @@ def create_model(
         dropout=dropout,
         recurrent_dropout=recurrent_dropout,
     )(x)
-    outputs = x
+    decoder = Model(decoder_inputs, decoder_outputs)
 
-    model = Model(inputs, outputs)
-    model.compile(optimizer="adam", loss="mse")
-    model.summary()
-    return model
+    # Autoencoder
+    model_input = Input(shape=input_shape)
+    encoded = encoder(model_input)
+    decoded = decoder(encoded)
+    model = Model(model_input, decoded)
+    model.compile(optimizer='Adam', loss='mse')
+
+    return encoder, decoder, model
 
 
-model = create_model(sequence_length, n_dims, batch_size)
+if __name__ == '__main__':
+    _, _, model = create_model(sequence_length, n_dims, batch_size)
 
-printc(f"BATCH SIZE: {batch_size}", color="blue")
-printc(f"COMPRESSION RATIO: {sequence_length}", color="blue")
-printc(f"NUMBER OF WEIGHT UPDATES: {num_batches * num_epochs}", color="blue")
-printc("==========" * 13)
-printc("Model creation done -> training ")
-printc("==========" * 13)
+    printc(f"BATCH SIZE: {batch_size}", color="blue")
+    printc(f"COMPRESSION RATIO: {sequence_length}", color="blue")
+    printc(f"NUMBER OF WEIGHT UPDATES: {num_batches * num_epochs}", color="blue")
+    printc("==========" * 13)
+    printc("Model creation done -> training ")
+    printc("==========" * 13)
 # ==================================================================================================
 # Training the model
 # ==================================================================================================
-# Set up callbacks
-early_stopping = EarlyStopping(
-    monitor="val_loss", patience=3, restore_best_weights=True
-)
-own_callback = CustomCallback(
-    num_epochs,
-    plotter=plotter,
-    batch_size=batch_size,
-    training_data=x_train,
-    validation_data=x_test,
-)
-history = model.fit(
-    x_train,
-    x_train,
-    epochs=num_epochs,
-    batch_size=batch_size,
-    shuffle=False,
-    validation_data=(x_test, x_test),
-    callbacks=[own_callback, early_stopping],
-    verbose=0,
-).history
-printc("==========" * 13)
-printc(f"Model training done ({num_epochs} epochs) -> Evaluation")
-printc("==========" * 13)
+    # Set up callbacks
+    early_stopping = EarlyStopping(
+        monitor="val_loss", patience=3, restore_best_weights=True
+    )
+    own_callback = CustomCallback(
+        num_epochs,
+        plotter=plotter,
+        batch_size=batch_size,
+        training_data=x_train,
+        validation_data=x_test,
+    )
+    history = model.fit(
+        x_train,
+        x_train,
+        epochs=num_epochs,
+        batch_size=batch_size,
+        shuffle=False,
+        validation_data=(x_test, x_test),
+        callbacks=[own_callback, early_stopping],
+        verbose=0,
+    ).history
+    printc("==========" * 13)
+    printc(f"Model training done ({num_epochs} epochs) -> Evaluation")
+    printc("==========" * 13)
 # ==================================================================================================
 # Evaluating the model
 # ==================================================================================================
-plt.plot(history["loss"], label="Train loss")
-plt.plot(history["val_loss"], label="Validation loss")
-plt.legend()
-plotter("loss", "/training_progress")
+    plt.plot(history["loss"], label="Train loss")
+    plt.plot(history["val_loss"], label="Validation loss")
+    plt.legend()
+    plotter("loss", "/training_progress")
 
-preds = model.predict(x_train, batch_size=batch_size)
-plt.plot(x_train.reshape(-1), label="original")
-plt.plot(preds.reshape(-1), label="reconstruction")
-plt.legend()
-plotter("train_full", "/evaluation")
-printc("PRMS-diff [train]: ", get_prms_diff(x_train, preds), color="yellow")
+    preds = model.predict(x_train, batch_size=batch_size)
+    plt.plot(x_train.reshape(-1), label="original")
+    plt.plot(preds.reshape(-1), label="reconstruction")
+    plt.legend()
+    plotter("train_full", "/evaluation")
+    printc("PRMS-diff [train]: ", get_prms_diff(x_train, preds), color="yellow")
 
-preds_test = model.predict(x_test, batch_size=batch_size)
-plt.plot(x_test.reshape(-1), label="original")
-plt.plot(preds_test.reshape(-1), label="reconstruction")
-plt.legend()
-plotter("test_full", "/evaluation")
-printc("PRMS-diff  [test]: ", get_prms_diff(x_test, preds_test), color="yellow")
-printc("==========" * 13)
-printc("Model evaluation done")
-printc("==========" * 13)
+    preds_test = model.predict(x_test, batch_size=batch_size)
+    plt.plot(x_test.reshape(-1), label="original")
+    plt.plot(preds_test.reshape(-1), label="reconstruction")
+    plt.legend()
+    plotter("test_full", "/evaluation")
+    printc("PRMS-diff  [test]: ", get_prms_diff(x_test, preds_test), color="yellow")
+    printc("==========" * 13)
+    printc("Model evaluation done")
+    printc("==========" * 13)
 # ==================================================================================================
 # EOF
 # ==================================================================================================

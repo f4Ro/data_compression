@@ -9,6 +9,15 @@
             "type": "python",
             "request": "launch",
             "program": "main.py",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Module: cbn_vae",
+            "type": "python",
+            "request": "launch",
+            "module": "models.cbn_vae.create_model",
+            "python": "${workspaceFolder}/.venv/bin/python",
             "console": "integratedTerminal"
         }
     ]

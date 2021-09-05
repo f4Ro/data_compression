@@ -25,8 +25,8 @@ plotter = Plotter("RNN", plt, backend="WebAgg")
 # ==================================================================================================
 # Data loading, preprocessing and plotting
 # ==================================================================================================
+sequence_length: int = 120
 batch_size: int = 1
-sequence_length: int = 20
 x_train, x_test = read_and_preprocess_data(
     sequence_length=sequence_length,
     batch_size=batch_size,
@@ -36,20 +36,9 @@ x_train, x_test = read_and_preprocess_data(
 x_train = x_train[:1900, :, :]
 x_test = x_test[1900:, :, :]
 global_mean = np.mean(np.concatenate((x_train, x_test), axis=0))
-
-printc(
-    f"[train] NUM EXAMPLES | SEQUENCE LENGTH | NUM DIMENSIONS: {x_train.shape[0]} \
-| {x_train.shape[1]} | {x_train.shape[2]}",
-    color="blue",
-)
-printc(
-    f"[test] NUM EXAMPLES | SEQUENCE LENGTH | NUM DIMENSIONS: {x_test.shape[0]} \
-| {x_test.shape[1]} | {x_test.shape[2]}",
-    color="blue",
-)
-printc("==========" * 13)
-printc("Data preparation done -> model creation")
-printc("==========" * 13)
+# printc("==========" * 13)
+# printc("Data preparation done -> model creation")
+# printc("==========" * 13)
 # ==================================================================================================
 # Building the model
 # ==================================================================================================
@@ -60,9 +49,8 @@ num_batches: int = int(x_train.shape[0] / batch_size)
 
 global_mean_bias = Constant(global_mean)
 
+
 # To be able to create a model elsewhere, have a function that can be imported
-
-
 def create_model(
     sequence_length: int,
     n_dims: int,

@@ -5,7 +5,7 @@ from benchmarking.compression.benchmarks.compression_ratio import get_compressio
 from benchmarking.compression.benchmarks.reconstruction_error import get_reconstruction_error
 
 
-def run_compression_benchmarks(encoder: Model, model: Model, data: Any, verbose: bool = False) -> dict:
+def run_compression_benchmarks(encoder: Model, model: Model, data: Any, batch_size: int, verbose: bool = False) -> dict:
     """
     Get the relevant compression metrics for a model.
     Check the respective functions for details about each metric.
@@ -14,8 +14,8 @@ def run_compression_benchmarks(encoder: Model, model: Model, data: Any, verbose:
     evaluation metric, which is simply the ratio of compression to reconstruction.
     """
 
-    reconstruction = model(data)
-    encoding = encoder(data)
+    reconstruction = model.predict(data, batch_size=batch_size)
+    encoding = encoder.predict(data, batch_size=batch_size)
 
     compression_ratio = get_compression_ratio(data, encoding)
     reconstruction_error = get_reconstruction_error(data, reconstruction)

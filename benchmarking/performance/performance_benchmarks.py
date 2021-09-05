@@ -9,7 +9,8 @@ from benchmarking.performance.benchmarks.time import get_times
 from utils.terminal_colorizer import printc
 
 
-def run_performance_benchmarks(encoder: Model, decoder: Model, model: Model, data: Any, verbose: bool = False) -> dict:
+def run_performance_benchmarks(
+        encoder: Model, decoder: Model, model: Model, data: Any, batch_size: int, verbose: bool = False) -> dict:
     """
     Run the benchmarks for a given encoder-decoder model.
     :param encoder: The encoder part of the network, provided as a keras model
@@ -23,7 +24,7 @@ def run_performance_benchmarks(encoder: Model, decoder: Model, model: Model, dat
     """
     # The time tracking has to happen before the get_flops because
     # when get_flops builds a graph it invalidates the encoder & decoder models
-    encoder_time, decoder_time = get_times(encoder, decoder, data)
+    encoder_time, decoder_time = get_times(encoder, decoder, data, batch_size)
     flops = get_flops(model)
     params = get_params(model)
     memory = get_memory(model)

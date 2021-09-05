@@ -1,19 +1,19 @@
 [tool.poetry]
-name = "Data compression of sensor signals using machine learning in a resource constrained environment"
+name = "data_compression"
 version = "0.1.0"
 description = ""
-authors = ["Alexander Kuebel <alexander.kuebel@code.berlin>", "Fabian Rothfuß <fabian.rothfuss@code.berlin>"]
-license = "MIT"
+authors = ["Fabian Rothfuß <fabian.rothfuss@code.berlin>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-matplotlib = "^3.4.2"
-tensorflow = "^2.5.0"
+python = "^3.7.1"
+matplotlib = "^3.4.3"
+tensorflow = "2.5.1"
+pandas = "^1.3.2"
+sklearn = "^0.0"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.5.7"
 flake8 = "^3.9.2"
-mypy = "^0.910"
 tornado = "^6.1"
 
 [build-system]

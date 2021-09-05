@@ -15,7 +15,7 @@ def get_reconstruction_error(original: Any, reconstruction: Any) -> float:
 
 
 def get_prms_diff(original: Any, prediction: Any, to_numpy: bool = True) -> Any:
-    diff = tf.reduce_sum(tf.square(tf.subtract(original, prediction)))
+    diff = tf.reduce_sum(tf.square(tf.subtract(original.reshape(-1), prediction.reshape(-1))))
     sq = tf.reduce_sum(tf.square(original))
     prms = 100 * (tf.sqrt(tf.divide(diff, sq + 0.e-6)))
 

@@ -45,3 +45,13 @@ class CustomConv2DTranspose(layers.Layer):
 
     def compute_output_shape(self, input_shape):
         return self.output_shape_
+
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update({
+            'filters': self.filters,
+            'kernel_size': self.kernel_size,
+            'output_shape': self.output_shape,
+            'activation': self.activation
+        })
+        return config

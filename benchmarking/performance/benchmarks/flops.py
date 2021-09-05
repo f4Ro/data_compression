@@ -1,6 +1,16 @@
 import tensorflow as tf
 from tensorflow.keras.models import Model
 
+from models.cbn_vae.custom_layers.max_pooling_with_argmax import MaxPoolWithArgMax
+from models.cbn_vae.custom_layers.unpooling_with_argmax import UnMaxPoolWithArgmax
+from models.cbn_vae.custom_layers.custom_conv2d_transpose import CustomConv2DTranspose
+
+custom_objects = {
+    'MaxPoolWithArgMax': MaxPoolWithArgMax,
+    'UnMaxPoolWithArgmax': UnMaxPoolWithArgmax,
+    'CustomConv2DTranspose': CustomConv2DTranspose
+}
+
 
 def get_flops(model: Model, path: str = './build/model.h5') -> int:
     """
@@ -24,7 +34,7 @@ def get_flops(model: Model, path: str = './build/model.h5') -> int:
             # work.
             # Another alternative that worked is creating the model inside of
             # this "with" statement
-            _ = tf.keras.models.load_model(path)
+            _ = tf.keras.models.load_model(path, custom_objects=custom_objects)
 
             run_meta = tf.compat.v1.RunMetadata()
             opts = tf.compat.v1.profiler.ProfileOptionBuilder.float_operation()

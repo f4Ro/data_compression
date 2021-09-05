@@ -3,9 +3,24 @@ import tensorflow as tf
 from typing import Any, List
 from functools import reduce
 
+dtype_mapping = {
+    'uint8': 8,
+    'int16': 16,
+    'int32': 32,
+    'float32': 32,
+    'float64': 64
+}
 
-def reduce_multiply(array: List) -> int:
-    return reduce(lambda x, y: x * y, array)
+
+def reduce_multiply(array: List, dtype: Any) -> int:
+    return reduce(lambda x, y: x * y, array) * dtype_mapping[dtype.__str__()]
+
+
+def get_encoded_volume(list_or_tensor: Any) -> int:
+    if isinstance(list_or_tensor, list):  # if model returns more than one tensor
+        return sum(list(map(get_encoded_volume, list_or_tensor)))
+    else:
+        return reduce_multiply(list_or_tensor.shape[1:], list_or_tensor.dtype)
 
 
 def get_compression_ratio(original: Any, encoder_output: Any) -> float:
@@ -20,8 +35,9 @@ def get_compression_ratio(original: Any, encoder_output: Any) -> float:
 
     # Ignore the first dimension (batch size) as it is always the same in both volumes and therefore
     # cancels out. In addition, this will cause an error if it is None
-    original_volume = reduce_multiply(original.shape[1:])
-    encoded_volume = reduce_multiply(encoder_output.shape[1:])
+    original_volume = reduce_multiply(original.shape[1:], original.dtype)
+    encoded_volume = get_encoded_volume(encoder_output); print(encoded_volume)
+
     if (encoded_volume > original_volume):
         raise Exception(
             f'Encoded data is bigger than original ({encoded_volume} > {original_volume}). \

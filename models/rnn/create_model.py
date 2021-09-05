@@ -83,7 +83,7 @@ def create_model(
     encoder = Model(encoder_inputs, encoder_outputs)
 
     # Decoder
-    decoder_inputs: Input = Input(shape=encoder_outputs.shape[1:], batch_size=batch_size)
+    decoder_inputs: Input = Input(shape=encoder_outputs.shape[1:], batch_size=batch_size, dtype=tf.float32)
     x = RepeatVector(sequence_length)(decoder_inputs)
     decoder_outputs = LSTM(
         n_dims,

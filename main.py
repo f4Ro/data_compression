@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 plotter = Plotter("RNN", plt, backend="WebAgg")
 
 
-x_train, x_test, sequence_length, batch_size = get_data_and_config('intel', 20, 1, is_multivariate=False)
+x_train, x_test, sequence_length, batch_size = get_data_and_config('intel', 20, 1, 1900, is_multivariate=False)
 encoder, decoder, model = create_model(sequence_length, x_train.shape[2], batch_size)
 train_model(model, x_train, x_test, 10, 1, plotter)
 print(run_benchmarks(encoder, decoder, model, x_test, batch_size))

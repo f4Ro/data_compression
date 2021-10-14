@@ -105,7 +105,7 @@ def create_model(
     model_input = Input(shape=input_shape)
     encoded = encoder(model_input)
     decoded = decoder(encoded)
-    model = Model(model_input, decoded)
+    model = Model(model_input, decoded, name='rnn')
     model.compile(optimizer='Adam', loss='mse')
 
     return encoder, decoder, model

@@ -4,7 +4,9 @@ from utils.terminal_colorizer import printc
 
 
 def get_data_and_config(
-        dataset_name: str, sequence_length: int, batch_size: int, is_multivariate: bool = False
+        dataset_name: str, sequence_length: int, batch_size: int,
+        train_test_cutoff: int,
+        is_multivariate: bool = False,
 ) -> Tuple[
         Any, Any, int, int
 ]:
@@ -16,10 +18,8 @@ def get_data_and_config(
             motes_test=[7],
             selected_dimensions=['temperature', 'humidity', 'light', 'voltage'] if is_multivariate else ['temperature']
         )
-        # x_train = x_train[:320, :, :]
-        # x_test = x_test[320:, :, :]
-        x_train = x_train[:1900, :, :]  # TODO:
-        x_test = x_test[1900:, :, :]
+        x_train = x_train[:train_test_cutoff, :, :]
+        x_test = x_test[train_test_cutoff:, :, :]
 
     printc(f"[train] NUM EXAMPLES | SEQUENCE LENGTH | NUM DIMENSIONS: {x_train.shape[0]} \
     | {x_train.shape[1]} | {x_train.shape[2]}", color="blue")

@@ -27,7 +27,13 @@ configurations = {
         "sequence_length": 20,
         "create_model": create_rnn,
         "default_config": {
-
+            "bottleneck_activation": "relu",
+            "decoder_activation": "tanh",
+            "dense_nodes": 38,
+            "encoder_activation": "relu",
+            "lr": 0.0008457671042644646,
+            "optimizer": "Adam",
+            "sgd_momentum": 0.8546169462999856
         }
     }
 }

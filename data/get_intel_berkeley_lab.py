@@ -99,15 +99,3 @@ def read_and_preprocess_data(
     x_test = reshape_inputs(x_test, n_dims)
 
     return x_train, x_test
-
-
-if __name__ == '__main__':
-    x_train, x_test, config = read_and_preprocess_data(
-        selected_dimensions=['temperature', 'humidity', 'light'],
-        sequence_length=20,
-        batch_size=1,
-        motes_train=[7],
-        motes_test=[7]
-    )
-    print(x_train.shape)
-    print(x_test.shape)

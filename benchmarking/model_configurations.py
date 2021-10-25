@@ -1,5 +1,5 @@
-from models.cbn_vae import create_model as create_cbn_vae
-from models.rnn import create_model as create_rnn
+from models.cbn_vae.create_model import create_model as create_cbn_vae
+from models.rnn.create_model import create_model as create_rnn
 
 configurations = {
     "cbn_vae": {
@@ -25,6 +25,9 @@ configurations = {
         "train_test_cutoff": 1900,
         "batch_size": 1,
         "sequence_length": 20,
-        "create_model": create_rnn
+        "create_model": create_rnn,
+        "default_config": {
+
+        }
     }
 }

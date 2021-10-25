@@ -36,9 +36,6 @@ x_train, x_test = read_and_preprocess_data(
 x_train = x_train[:1900, :, :]
 x_test = x_test[1900:, :, :]
 global_mean = np.mean(np.concatenate((x_train, x_test), axis=0))
-# printc("==========" * 13)
-# printc("Data preparation done -> model creation")
-# printc("==========" * 13)
 # ==================================================================================================
 # Building the model
 # ==================================================================================================

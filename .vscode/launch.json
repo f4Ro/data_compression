@@ -19,6 +19,14 @@
             "module": "models.cbn_vae.create_model",
             "python": "${workspaceFolder}/.venv/bin/python",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Module: test",
+            "type": "python",
+            "request": "launch",
+            "module": "benchmarking.conduct_experiments",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "console": "integratedTerminal"
         }
     ]
 }

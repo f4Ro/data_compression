@@ -28,8 +28,3 @@ def _get_color_from_string(string: str) -> str:
         'yellow': bcolors.WARNING,
         'red': bcolors.FAIL
     }[string.lower()]
-
-
-if __name__ == '__main__':
-    printc('test', 1)
-    printc('a', 'abcnc ', 3, 3223, color='yellow')

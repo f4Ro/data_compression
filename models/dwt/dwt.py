@@ -1,5 +1,6 @@
 import pywt
 import numpy as np
+import tensorflow as tf
 
 # from benchmarking.compression.benchmarks.compression_ratio import get_compression_ratio
 # from benchmarking.compression.benchmarks.reconstruction_error import get_reconstruction_error

@@ -53,6 +53,8 @@ def conduct_single_experiment(
     plotter(f'{model_name}-{dataset_name}-{iteration_number}', sub_path=f'/{model_name}/{iteration_number}')
 
     results = run_benchmarks_once(encoder, decoder, model, x_test, batch_size, verbose=False)
-    with open(f'results/experiments/{model_name}/{iteration_number}/{model_name}-{dataset_name}-{iteration_number}.json', 'w') as outfile:
+    with open(
+        f'results/experiments/{model_name}/{iteration_number}/{model_name}-{dataset_name}-{iteration_number}.json',
+            'w') as outfile:
         outfile.write(json.dumps(results))
     return results

@@ -6,6 +6,7 @@
 from numpy.random import seed; seed(1)
 import tensorflow as tf; tf.random.set_seed(1)
 # TensorFlow and keras
+from tensorflow import keras
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import LSTM, Input, RepeatVector
@@ -49,10 +50,10 @@ global_mean_bias = Constant(global_mean)
 
 # To be able to create a model elsewhere, have a function that can be imported
 def create_model(
-    sequence_length: int,
-    n_dims: int,
-    batch_size: int,
-    activation: str = "tanh",
+    config: dict,
+    n_dims: int = 1,
+    sequence_length: int = 20,
+    batch_size: int = 1,
     recurrent_activation: str = "sigmoid",
     kernel_regularizer: Any = l2(0.0),
     bias_regularizer: Any = l2(0.0),
@@ -61,7 +62,6 @@ def create_model(
     recurrent_dropout: float = 0.0,
 ) -> Model:
     input_shape = (sequence_length, n_dims)
-
     # Encoder
     # [batch, timesteps, feature] is shape of inputs
     encoder_inputs: Input = Input(shape=input_shape, batch_size=batch_size)
@@ -69,7 +69,7 @@ def create_model(
         n_dims,
         return_sequences=False,
         stateful=True,
-        activation=activation,
+        activation=config['activation_encoder'],
         recurrent_activation=recurrent_activation,
         kernel_regularizer=kernel_regularizer,
         bias_regularizer=bias_regularizer,
@@ -88,7 +88,7 @@ def create_model(
         return_sequences=True,
         bias_initializer=global_mean_bias,
         unit_forget_bias=False,
-        activation=activation,
+        activation=config['activation_decoder'],
         recurrent_activation=recurrent_activation,
         kernel_regularizer=kernel_regularizer,
         bias_regularizer=bias_regularizer,
@@ -103,7 +103,11 @@ def create_model(
     encoded = encoder(model_input)
     decoded = decoder(encoded)
     model = Model(model_input, decoded, name='rnn')
-    model.compile(optimizer='Adam', loss='mse')
+
+    adam_optimizer = keras.optimizers.Adam(lr=config["lr"])
+    sgd_optimizer = keras.optimizers.SGD(lr=config["lr"], momentum=config["sgd_momentum"])
+    optimizer = adam_optimizer if config['optimizer'] == 'Adam' else sgd_optimizer
+    model.compile(optimizer=optimizer, loss='mse')
 
     return encoder, decoder, model
 

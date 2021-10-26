@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+from typing import Any, Tuple
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
@@ -10,11 +10,8 @@ def read_and_preprocess_data(
     cut_off_min: int = 5,
     cut_off_max: int = 45,
     should_scale: bool = True,
-    data_path: str = "data/datasets/intel.txt",
-    batch_size: int = 32,
-    motes_train: List = [1, 2, 3, 4, 6, 7, 9, 10, 32, 34, 35],
-    motes_test: List = [36],
-    selected_dimensions: List = ['temperature', 'humidity', 'light', 'voltage']
+    data_path: str = "data/datasets/distillate_flow.txt",
+    batch_size: int = 32
 ) -> Tuple[Any, Any, dict]:
     """
     """
@@ -24,16 +21,7 @@ def read_and_preprocess_data(
         data_path,
         sep=" ",
         lineterminator="\n",
-        names=[
-            "date",
-            "time",
-            "epoch",
-            "moteid",
-            "temperature",
-            "humidity",
-            "light",
-            "voltage",
-        ],
+        names=["Flow"],
     )
 
     # Clean nans
@@ -41,29 +29,20 @@ def read_and_preprocess_data(
 
     # Clean outliers
     df.drop(
-        df[(df["temperature"] < cut_off_min) | (df["temperature"] > cut_off_max)].index,
+        df[(df["Flow"] < cut_off_min) | (df["Flow"] > cut_off_max)].index,
         inplace=True,
     )
 
     # temperature_std = df["temperature"].std()
-    lower_bound = df["temperature"].mean() - 3 * df["temperature"].std()
-    upper_bound = df["temperature"].mean() + 3 * df["temperature"].std()
+    lower_bound = df["Flow"].mean() - 3 * df["Flow"].std()
+    upper_bound = df["Flow"].mean() + 3 * df["Flow"].std()
     df.drop(
-        df[(df["temperature"] < lower_bound) | (df["temperature"] > upper_bound)].index,
+        df[(df["Flow"] < lower_bound) | (df["Flow"] > upper_bound)].index,
         inplace=True,
     )
 
-    def concat_motes(mote_ids: List) -> pd.DataFrame:
-        # Concatenate all relevant motes into one dataframe
-        tmp_frames = []
-        for mote_id in mote_ids:
-            tmp_frame = df.loc[df["moteid"] == mote_id][[*selected_dimensions]]
-            tmp_frame = tmp_frame.reset_index(drop=True)
-            tmp_frames.append(tmp_frame)
-        return pd.concat(tmp_frames, axis=0)
-
-    x_train = concat_motes(motes_train)
-    x_test = concat_motes(motes_test)
+    x_train = df
+    x_test = df
 
     n_dims = x_train.shape[1]
     assert n_dims == x_test.shape[1]

@@ -26,7 +26,7 @@ class Plotter:
             raise 'If should plot default is set to True, backend must not be None'
         if self._backend is not None:
             plt.switch_backend(backend)
-        self._clear_old_plots(f'./plots/{filename}')
+        self._clear_old_plots(f'./results/{filename}')
 
     def __call__(
         self: Plotter, plotname: str,

@@ -3,9 +3,9 @@ from models.rnn.create_model import create_model as create_rnn
 
 configurations = {
     "cbn_vae": {
-        "num_epochs": 20,
+        "num_epochs": 80,
         "epoch_interval": 2,
-        "train_test_cutoff": 320,
+        "train_test_cutoff": {'intel': 320, 'distillate_flow': 96},
         "batch_size": 32,
         "sequence_length": 120,
         "create_model": create_cbn_vae,
@@ -22,18 +22,16 @@ configurations = {
     "rnn": {
         "num_epochs": 10,
         "epoch_interval": 1,
-        "train_test_cutoff": 1900,
+        "train_test_cutoff": {'intel': 1900, 'distillate_flow': 500},
         "batch_size": 1,
         "sequence_length": 20,
         "create_model": create_rnn,
         "default_config": {
-            "bottleneck_activation": "relu",
-            "decoder_activation": "tanh",
-            "dense_nodes": 38,
-            "encoder_activation": "relu",
-            "lr": 0.0008457671042644646,
+            "activation_encoder": "tanh",
+            "activation_decoder": "tanh",
+            "lr": 0.000870754588885921,
             "optimizer": "Adam",
-            "sgd_momentum": 0.8546169462999856
+            "sgd_momentum": 0.39476641387354156,
         }
     }
 }

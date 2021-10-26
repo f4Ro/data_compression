@@ -8,21 +8,20 @@ from typing import Any, List
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
-
 wavelet = "db1"
 
 batch_size: int = 1
-sequence_length: int = 20
+sequence_length: int = 120
 
 
 def read_and_preprocess_data(
     should_smooth: bool = False,
     smoothing_window: int = 100,
-    sequence_length: int = 120,
+    sequence_length: int = 20,
     cut_off_min: int = 5,
     cut_off_max: int = 45,
     should_scale: bool = True,
-    data_path: str = "data/datasets/data.txt",
+    data_path: str = "/work/data/IntelBerkeleyResearchLab.txt",
     batch_size: int = 32,
     motes_train: List = [1, 2, 3, 4, 6, 7, 9, 10, 32, 34, 35],
     motes_test: List = [36],
@@ -140,16 +139,18 @@ def get_prms_diff(original: Any, prediction: Any, to_numpy: bool = True) -> Any:
     return prms.numpy() if to_numpy else prms
 
 
-def dwt(time_series):
+def dwt(time_series, keep):
+    reconstruction = None
+    compression_ratio = (1 / keep)
+
     for time_step in time_series:
-        coeffs = pywt.wavedec(time_step, wavelet=wavelet)
+        time_step = np.squeeze(time_step)
+        coeffs = pywt.wavedec(time_step, wavelet=wavelet, level=4)
 
         coeff_arr, coeff_slices = pywt.coeffs_to_array(coeffs)
 
         Csort = np.sort(np.abs(coeff_arr.reshape(-1)))
 
-        # for keep in (0.1, 0.05, 0.01, 0.005):
-        keep = 0.1
         number = int(np.floor((1 - keep) * len(Csort)))
         thresh = Csort[number]
         ind = np.abs(coeff_arr) > thresh
@@ -157,4 +158,17 @@ def dwt(time_series):
 
         coeffs_filt = pywt.array_to_coeffs(Cfilt, coeff_slices, output_format="wavedec")
         Arecon = pywt.waverec(coeffs_filt, wavelet=wavelet)
-        print(Arecon, time_step)
+        if reconstruction is None:
+            reconstruction = Arecon
+        else:
+            reconstruction = np.concatenate((reconstruction, Arecon), axis=None)
+
+    diff = get_prms_diff(time_series.reshape(-1), reconstruction)
+    print(diff, "% for compression ratio of", compression_ratio)
+
+    return reconstruction
+
+
+dwt(x_train, 0.1)
+dwt(x_train, 0.0667)
+dwt(x_train, 0.05)

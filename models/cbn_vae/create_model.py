@@ -18,16 +18,13 @@ from tensorflow.keras.layers import (
     UpSampling2D
 )
 # Custom layers
-from models.shared_code.get_data_and_config import get_data_and_config
 from models.cbn_vae.custom_layers.custom_conv2d_transpose import CustomConv2DTranspose
 # from models.cbn_vae.custom_layers.unpooling_with_argmax import UnMaxPoolWithArgmax
 from models.cbn_vae.custom_layers.max_pooling_with_argmax import MaxPoolWithArgMax
-from models.shared_code.custom_callback import CustomCallback
 from models.cbn_vae.custom_layers.sampling import sample_from_latent_space
 # Other external libs
 import matplotlib.pyplot as plt
 # Own code
-from benchmarking.benchmarks import run_benchmarks
 # from benchmarking.compression.benchmarks.reconstruction_error import get_prms_diff
 from utils.plotter import Plotter
 plotter = Plotter("cbn_vae", plt, backend="WebAgg")
@@ -38,26 +35,26 @@ def create_model(config: dict, batch_size: int = 32, sequence_length: int = 120,
     encoder_inputs: Input = Input(shape=(sequence_length, 1, n_dims), batch_size=batch_size, name='encoder_input')
 
     channels, kernel = 24, 12
-    out_conv1 = Conv2D(
+    out_conv1 = Conv2D(  # None, 10, 1, 24 | None, 10, 1, 24
         channels,
         (kernel, 1),
         strides=kernel,
         activation=config["encoder_activation"],
         padding="same",
     )(encoder_inputs)
-    out_reshape1 = Reshape((-1, 1, 1))(out_conv1)
-    out_pool1, mask1 = MaxPoolWithArgMax()(out_reshape1)
+    out_reshape1 = Reshape((-1, 1, 1))(out_conv1)  # None, 240, 1, 1 | None, 60, 1, 1
+    out_pool1, mask1 = MaxPoolWithArgMax()(out_reshape1)  # None, 120, 1, 1 | None, 30, 1, 1
 
     channels, kernel = 12, 9
-    out_conv2 = Conv2D(
+    out_conv2 = Conv2D(  # | None, 4, 1, 12
         channels,
         (kernel, 1),
         strides=kernel,
         activation=config["encoder_activation"],
         padding="same",
     )(out_pool1)
-    out_reshape2 = Reshape((-1, 1, 1))(out_conv2)
-    out_pool2, mask2 = MaxPoolWithArgMax()(out_reshape2)
+    out_reshape2 = Reshape((-1, 1, 1))(out_conv2)  # None, 240, 1, 1 | None, 12, 1 ,4
+    out_pool2, mask2 = MaxPoolWithArgMax()(out_reshape2)  # None, 32, 84, 1, 1 | None, 6, 1, 4
 
     out_max_pool_1, mask3 = MaxPoolWithArgMax()(out_pool2)
 
@@ -119,7 +116,7 @@ def create_model(config: dict, batch_size: int = 32, sequence_length: int = 120,
     de_out_pool6 = UpSampling2D(size=(2, 1))(de_out_pool5)  # 5
     de_out_reshape5 = Reshape(out_conv4.shape[1:])(de_out_pool6)
     de_out_transcov1 = CustomConv2DTranspose(
-        channels, kernel, out_pool3.shape, activation=config["decoder_activation"]
+        channels, kernel, out_pool3.shape, activation=config["decoder_activation"], name='out_transcov1'
     )(de_out_reshape5)
 
     channels, kernel = 12, 5
@@ -131,6 +128,7 @@ def create_model(config: dict, batch_size: int = 32, sequence_length: int = 120,
         kernel,
         out_max_pool_1.shape,
         activation=config["decoder_activation"],
+        name='out_transcov2'
     )(de_out_reshape6)
 
     # de_out_pool8 = UnMaxPoolWithArgmax()(de_out_transcov2, masks[-4])  # 3
@@ -142,7 +140,7 @@ def create_model(config: dict, batch_size: int = 32, sequence_length: int = 120,
     de_out_pool9 = UpSampling2D(size=(2, 1))(de_out_pool8)  # 2
     de_out_reshape7 = Reshape(out_conv2.shape[1:])(de_out_pool9)
     de_out_transcov3 = CustomConv2DTranspose(
-        channels, kernel, out_pool1.shape, activation=config["decoder_activation"]
+        channels, kernel, out_pool1.shape, activation=config["decoder_activation"], name='out_transcov3'
     )(de_out_reshape7)
 
     channels, kernel = 24, 12
@@ -150,8 +148,8 @@ def create_model(config: dict, batch_size: int = 32, sequence_length: int = 120,
     de_out_pool10 = UpSampling2D(size=(2, 1))(de_out_transcov3)  # 1
     de_out_reshape8 = Reshape(out_conv1.shape[1:])(de_out_pool10)
     de_out_transcov4 = CustomConv2DTranspose(
-        channels, kernel, encoder_inputs.shape, activation=config["decoder_activation"]
-    )(de_out_reshape8)
+        channels, kernel, encoder_inputs.shape, activation=config["decoder_activation"],
+        n_filter_dims=n_dims, name='out_transcov4')(de_out_reshape8)
     decoder_outputs = de_out_transcov4
     decoder = Model([decoder_inputs, masks], decoder_outputs)
 
@@ -160,7 +158,6 @@ def create_model(config: dict, batch_size: int = 32, sequence_length: int = 120,
     encoder_outputs = encoder(model_input)
     decoded = decoder(encoder_outputs)
     model = Model(model_input, decoded, name='cbn_vae')
-    model.compile(optimizer='Adam', loss='mse')
 
     adam_optimizer = keras.optimizers.Adam(lr=config["lr"])
     sgd_optimizer = keras.optimizers.SGD(lr=config["lr"], momentum=config["sgd_momentum"])
@@ -172,24 +169,3 @@ def create_model(config: dict, batch_size: int = 32, sequence_length: int = 120,
         metrics=[],
     )
     return encoder, decoder, model
-
-
-if __name__ == "__main__":
-    pass
-    # history = model.fit(
-    #     x_train,
-    #     x_train,
-    #     batch_size=32,
-    #     epochs=100,
-    #     validation_data=(x_test, x_test),
-    #     shuffle=False,
-    #     callbacks=[],
-    # ).history
-
-    # train_preds = model.predict(x_train, batch_size=32)
-    # test_preds = model.predict(x_test, batch_size=32)
-
-    # prms_diff = get_prms_diff(x_test.reshape(-1, 120, 1, 1), test_preds)
-
-    # # reconstruction, prms_diff = smooth_output(x_test, test_preds, smoothing_window=5)
-    # print(f"The percentual-RMS-difference for the configuration after the re-training is {prms_diff}")

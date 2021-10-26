@@ -5,7 +5,7 @@ from benchmarking.compression.compression_benchmarks import run_compression_benc
 from benchmarking.performance.performance_benchmarks import run_performance_benchmarks
 
 
-def run_benchmarks(
+def run_benchmarks_once(
         encoder: Model, decoder: Model, model: Model, data: Any, batch_size: int, verbose: bool = False) -> dict:
 
     # Always put performance benchmarks last because in the process the model graph is frozen
@@ -17,13 +17,3 @@ def run_benchmarks(
         **compression_results,
         **performance_results
     }
-
-
-# if __name__ == '__main__':
-#     # from models.dummy_model import encoder, decoder, model
-#     # data = tf.ones((1, 10))
-#     # print(run_benchmarks(encoder, decoder, model, data))
-#     from models.rnn.rnn import create_model
-#     encoder, decoder, model = create_model(20, 1, 1)
-#     data = tf.ones((1, 20, 1))
-#     print(run_benchmarks(encoder, decoder, model, data, batch_size))

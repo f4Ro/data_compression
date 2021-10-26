@@ -1,5 +1,5 @@
-from models.cbn_vae import create_model as create_cbn_vae
-from models.rnn import create_model as create_rnn
+from models.cbn_vae.create_model import create_model as create_cbn_vae
+from models.rnn.create_model import create_model as create_rnn
 
 configurations = {
     "cbn_vae": {
@@ -25,6 +25,15 @@ configurations = {
         "train_test_cutoff": 1900,
         "batch_size": 1,
         "sequence_length": 20,
-        "create_model": create_rnn
+        "create_model": create_rnn,
+        "default_config": {
+            "bottleneck_activation": "relu",
+            "decoder_activation": "tanh",
+            "dense_nodes": 38,
+            "encoder_activation": "relu",
+            "lr": 0.0008457671042644646,
+            "optimizer": "Adam",
+            "sgd_momentum": 0.8546169462999856
+        }
     }
 }

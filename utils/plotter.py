@@ -38,7 +38,7 @@ class Plotter:
         should_plot = self._should_plot if should_plot is None else should_plot
 
         if should_save is True:
-            dir_path = f'./plots/{self._filename}{sub_path}'
+            dir_path = f'./results/{self._filename}{sub_path}'
             file_path = dir_path + f'/{plotname}'
             self._ensure_path_exists(dir_path)
             plt.savefig(file_path, dpi=dpi)

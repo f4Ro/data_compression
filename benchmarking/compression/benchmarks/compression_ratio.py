@@ -1,5 +1,3 @@
-import tensorflow as tf
-
 from typing import Any, List
 from functools import reduce
 
@@ -8,7 +6,8 @@ dtype_mapping = {
     'int16': 16,
     'int32': 32,
     'float32': 32,
-    'float64': 64
+    'float64': 64,
+    "<dtype: 'float64'>": 64
 }
 
 
@@ -36,7 +35,7 @@ def get_compression_ratio(original: Any, encoder_output: Any) -> float:
     # Ignore the first dimension (batch size) as it is always the same in both volumes and therefore
     # cancels out. In addition, this will cause an error if it is None
     original_volume = reduce_multiply(original.shape[1:], original.dtype)
-    encoded_volume = get_encoded_volume(encoder_output); print(encoded_volume)
+    encoded_volume = get_encoded_volume(encoder_output)
 
     if (encoded_volume > original_volume):
         raise Exception(
@@ -45,9 +44,3 @@ def get_compression_ratio(original: Any, encoder_output: Any) -> float:
         )
 
     return original_volume / encoded_volume
-
-
-if __name__ == '__main__':
-    orig = tf.ones((1, 10))
-    comp = tf.ones((1, 1))
-    print(get_compression_ratio(orig, comp))

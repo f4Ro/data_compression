@@ -3,7 +3,7 @@ import tensorflow.keras.backend as K
 
 
 class CustomConv2DTranspose(layers.Layer):
-    def __init__(self, filters, kernel_size, output_shape, activation, **kwargs):
+    def __init__(self, filters, kernel_size, output_shape, activation, n_filter_dims=1, **kwargs):
         super(CustomConv2DTranspose, self).__init__(**kwargs)
 
         self.filters = filters
@@ -13,12 +13,15 @@ class CustomConv2DTranspose(layers.Layer):
             activation
         ]
 
+        # Determines the number of channels of the output of the transconv operation
+        self.filter_output_channels = n_filter_dims
         self.trainable = True
 
-    def build(self, input_shape):
+    def build(self, _):  # (self, input_shape)
+        # shape = (height, width, out_channels, in_channels)
         self.kernel = self.add_weight(
             name="kernel",
-            shape=(self.kernel_size, 1, 1, self.filters),
+            shape=(self.kernel_size, 1, self.filter_output_channels, self.filters),
             initializer="uniform",
             trainable=True,
         )
@@ -36,14 +39,7 @@ class CustomConv2DTranspose(layers.Layer):
         activations = self.activation(outputs)
         return activations
 
-        # Stack overflow
-        # outputs = K.conv2d_transpose(inputs, self.kernel, self.output_shape_)
-        # outputs = K.bias_add(outputs, self.bias)
-        # self.shape = outputs.shape
-        # outputs = K.reshape(outputs, [-1, self.shape[1] * self.shape[2] * self.shape[3]])
-        # return outputs
-
-    def compute_output_shape(self, input_shape):
+    def compute_output_shape(self, _):  # (self, input_shape)
         return self.output_shape_
 
     def get_config(self):
